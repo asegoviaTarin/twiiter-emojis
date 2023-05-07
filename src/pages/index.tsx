@@ -28,9 +28,6 @@ const Home: NextPage = () => {
               {data?.map((item) => (<div key={item.id}>{item.content}</div>))}
             </div>
           </div>
-          <p className="text-2xl text-white">
-            {data ? data.greeting : "Loading tRPC query..."}
-          </p>
         </div>
       </main>
     </>
