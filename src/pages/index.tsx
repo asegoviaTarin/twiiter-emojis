@@ -1,63 +1,119 @@
+import { SignInButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useUser } from "@clerk/nextjs";
-import { api,   } from "~/utils/api";
-import type { RouterOutputs } from "../utils/api";
+
+import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadSpinner } from "~/components/loading";
+import { useState } from "react";
+import { Toaster, toast } from "react-hot-toast";
+
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
+
+  const [input, setInput] = useState("");
+
+  const ctx = api.useContext();
+
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    },
+    onError: (e) => {
+      const errorEmojiString = 'Invalid emoji'
+      const errorEmoji = e.data?.stack?.includes(errorEmojiString);
+
+      if (errorEmoji) {
+        toast.error(errorEmojiString);
+      } else {
+        toast.error("Failed to post! Please try again later.");
+      }
+    },
+  });
+
   if (!user) return null;
-  // className="border border-slate-400 p-4"
-  return (<div className="flex gap-3 border border-slate-400  p-4">
-    <Image
-    src={user.profileImageUrl}
-    className="w-14 h-14 rounded-full"
-    alt={`@${user.username}`}
-    width={56}
-    height={56}/>
-    <input placeholder="Type som emojis!" className="grow outline-none bg-transparent" />
-  </div>)
+
+  return (
+    <div className="flex w-full gap-3">
+      <Image
+        src={user.profileImageUrl}
+        alt="Profile image"
+        className="h-14 w-14 rounded-full"
+        width={56}
+        height={56}
+      />
+      <input
+        placeholder="Type some emojis!"
+        className="grow bg-transparent outline-none"
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
+      />
+      <button onClick={() => mutate({ content: input })}>Post</button>
+      <div><Toaster/></div>
+    </div>
+  );
 };
 
-type PostWithUser = RouterOutputs['posts']['getAll'][number];
+type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
 const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
-    <div key={post.id} className="flex gap-3 border border-slate-400 p-4">
+    <div key={post.id} className="flex gap-3 border-b border-slate-400 p-4">
       <Image
-      src={author.profileImageUrl}
-      alt="Profile image" className="w-14 h-14 rounded-full"
-      width={56}
-      height={56}
+        src={author.profileImageUrl}
+        className="h-14 w-14 rounded-full"
+        alt={`@${author.username}'s profile picture`}
+        width={56}
+        height={56}
       />
       <div className="flex flex-col">
-        <div>
-          <span className="font-bold">{`@${author?.username}`}</span>
-          <span className="text-slate-500">{` · ${dayjs(post.createdAt).fromNow()}`}</span>
+        <div className="flex gap-1 text-slate-300">
+          <span>{`@${author.username} `}</span>
+          <span className="font-thin">{` · ${dayjs(
+            post.createdAt
+          ).fromNow()}`}</span>
         </div>
-
-        <span className="text-2">
-          {post.content}
-        </span>
+        <span className="text-2xl">{post.content}</span>
       </div>
     </div>
-  )
+  );
+};
 
-}
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+
+  if (postsLoading) return <LoadSpinner />;
+
+  if (!data) return <div>Something went wrong</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data.map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </div>
+  );
+};
 
 const Home: NextPage = () => {
-  const user = useUser();
-  const { data, isLoading } = api.posts.getAll.useQuery();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
-  if (isLoading) return <LoadSpinner/>;
+  // Start fetching asap
+  api.posts.getAll.useQuery();
 
-  if (!data) <div>Something went wrong</div>;
+  // Return empty div if user isn't loaded
+  if (!userLoaded) return <div />;
+
   return (
     <>
       <Head>
@@ -66,18 +122,17 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex h-screen justify-center">
-        <div className="h-full w-full border-x md:max-w-2xl border-slate-400">
-          <div>
-            {user.isSignedIn && <CreatePostWizard />}
-          </div >
-          <div>
-            {[...data, ...data]?.map((fullPost) => (
-              <PostView {...fullPost} key={fullPost.post.id} />
-            ))}
+        <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
+          <div className="flex border-b border-slate-400 p-4">
+            {!isSignedIn && (
+              <div className="flex justify-center">
+                <SignInButton />
+              </div>
+            )}
+            {isSignedIn && <CreatePostWizard />}
           </div>
 
-          <div>
-          </div>
+          <Feed />
         </div>
       </main>
     </>
