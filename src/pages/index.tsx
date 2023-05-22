@@ -1,35 +1,48 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useUser } from "@clerk/nextjs";
-import { api } from "~/utils/api";
-import { type RouterOptions } from "next/dist/server/router";
+import { api,   } from "~/utils/api";
+import type { RouterOutputs } from "../utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Image from "next/image";
+import { LoadSpinner } from "~/components/loading";
 dayjs.extend(relativeTime);
+
 const CreatePostWizard = () => {
   const { user } = useUser();
   if (!user) return null;
-
-  return (<div className="flex gap-3">
-    <img src={user.profileImageUrl} alt="Profile image" className="w-14 h-14 rounded-full"></img>
+  // className="border border-slate-400 p-4"
+  return (<div className="flex gap-3 border border-slate-400  p-4">
+    <Image
+    src={user.profileImageUrl}
+    className="w-14 h-14 rounded-full"
+    alt={`@${user.username}`}
+    width={56}
+    height={56}/>
     <input placeholder="Type som emojis!" className="grow outline-none bg-transparent" />
   </div>)
 };
 
-type PostWithUser = RouterOptions['posts']['getAll']['number'];
+type PostWithUser = RouterOutputs['posts']['getAll'][number];
 
 const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
-    <div key={post.id} className="boder-b border-slate-400 p-8">
-      <img src={author.profileImageUrl} alt="Profile image" className="w-14 h-14 rounded-full"></img>
+    <div key={post.id} className="flex gap-3 border border-slate-400 p-4">
+      <Image
+      src={author.profileImageUrl}
+      alt="Profile image" className="w-14 h-14 rounded-full"
+      width={56}
+      height={56}
+      />
       <div className="flex flex-col">
         <div>
           <span className="font-bold">{`@${author?.username}`}</span>
           <span className="text-slate-500">{` · ${dayjs(post.createdAt).fromNow()}`}</span>
         </div>
 
-        <span>
+        <span className="text-2">
           {post.content}
         </span>
       </div>
@@ -42,7 +55,9 @@ const Home: NextPage = () => {
   const user = useUser();
   const { data, isLoading } = api.posts.getAll.useQuery();
 
-  if (!data || isLoading) return <div>loading...</div>;
+  if (isLoading) return <LoadSpinner/>;
+
+  if (!data) <div>Something went wrong</div>;
   return (
     <>
       <Head>
@@ -51,10 +66,10 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex h-screen justify-center">
-        <div className="h-full w-full border-x md:max-w-2xl border-slate-400 ">
+        <div className="h-full w-full border-x md:max-w-2xl border-slate-400">
           <div>
             {user.isSignedIn && <CreatePostWizard />}
-          </div>
+          </div >
           <div>
             {[...data, ...data]?.map((fullPost) => (
               <PostView {...fullPost} key={fullPost.post.id} />
