@@ -11,6 +11,7 @@ import Image from "next/image";
 import { LoadSpinner } from "~/components/loading";
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import Link from "next/link";
 
 dayjs.extend(relativeTime);
 
@@ -27,11 +28,10 @@ const CreatePostWizard = () => {
       void ctx.posts.getAll.invalidate();
     },
     onError: (e) => {
-      const errorEmojiString = 'Invalid emoji'
-      const errorEmoji = e.data?.stack?.includes(errorEmojiString);
+      const errorEmoji = JSON.parse(e.message)[0].message;
 
       if (errorEmoji) {
-        toast.error(errorEmojiString);
+        toast.error(errorEmoji);
       } else {
         toast.error("Failed to post! Please try again later.");
       }
@@ -78,10 +78,10 @@ const PostView = (props: PostWithUser) => {
       />
       <div className="flex flex-col">
         <div className="flex gap-1 text-slate-300">
-          <span>{`@${author.username} `}</span>
-          <span className="font-thin">{` · ${dayjs(
+          <Link href={`/@${author.username}`}><span>{`@${author.username} `}</span></Link>
+          <Link href={`post/${post.id}`}><span className="font-thin">{` · ${dayjs(
             post.createdAt
-          ).fromNow()}`}</span>
+          ).fromNow()}`}</span></Link>
         </div>
         <span className="text-2xl">{post.content}</span>
       </div>
