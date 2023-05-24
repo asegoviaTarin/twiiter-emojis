@@ -2,12 +2,14 @@
   "name": "twitter-emojis",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "keep-db-alive": "ts-node-esm src/scripts/keep-alive.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.17.1",

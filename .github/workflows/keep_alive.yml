@@ -1,0 +1,12 @@
+# .github/workflows/keep_alive.yml
+
+name: Keep alive cron job
+on:
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call endpoint to keep the database alive
+        run: npm run keep-db-alive
