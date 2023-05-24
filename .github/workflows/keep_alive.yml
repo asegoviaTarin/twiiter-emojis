@@ -1,9 +1,7 @@
 # .github/workflows/keep_alive.yml
 
 name: Keep alive cron job
-on:
-  schedule:
-    - cron: '20 * * * *'
+on: push
 jobs:
   cron:
     runs-on: ubuntu-latest
