@@ -19,10 +19,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Call endpoint to keep the database
-        run: npm install ts-node
 
-      - name: Call endpoint to keep the database
+      - name: Print seccret
         run: echo "DATABASE_URL=$DATABASE_URL"
 
       - name: Call endpoint to keep the database
