@@ -8,6 +8,9 @@ on:
     branches: [ "master" ]
   workflow_dispatch:
 
+env:
+  DATABASE_URL: 'mysql://4e7thhtr2qns8z3ro9q0:pscale_pw_6CnbJHcQR1bXPxkfsdU4fIYWLe2RJu1TQIgRSrdCmmm@aws.connect.psdb.cloud/chirpdb?sslaccept=strict'
+
 jobs:
   cron:
     runs-on: ubuntu-latest
@@ -16,8 +19,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: install ts-node
+      - name: Call endpoint to keep the database
         run: npm install ts-node
+
+      - name: Call endpoint to keep the database
+        run: echo "DATABASE_URL=$DATABASE_URL"
 
       - name: Call endpoint to keep the database
         run: npm run keep-db-alive
