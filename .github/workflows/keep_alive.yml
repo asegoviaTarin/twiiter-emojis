@@ -3,7 +3,7 @@
 name: Keep alive cron job
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '* * * * *'
 jobs:
   cron:
     runs-on: ubuntu-latest
