@@ -9,12 +9,11 @@ on:
   workflow_dispatch:
 
 env:
-  DATABASE_URL: 'mysql://4e7thhtr2qns8z3ro9q0:pscale_pw_6CnbJHcQR1bXPxkfsdU4fIYWLe2RJu1TQIgRSrdCmmm@aws.connect.psdb.cloud/chirpdb?sslaccept=strict'
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
   cron:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v2
