@@ -3,7 +3,7 @@
 name: Keep alive cron job
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 0 * * 1,4'
 
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}

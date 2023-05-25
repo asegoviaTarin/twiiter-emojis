@@ -10,7 +10,6 @@ const globalForPrisma = globalThis as unknown as {
   });
 
 const runQuery = async function() {
-  // const result = await prisma.post.findMany({ take: 100, orderBy: [{ createdAt: "desc" }] })
   await prisma.post.create({ data :{ authorId: 'user_2PQvKL1HvZ4dyalz0bGOfjP7EPX', content:'⏳' }})
 
 }

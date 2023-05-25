@@ -14,11 +14,11 @@ import {
 const addUserDataToPosts = async (posts: Post[]) => {
   const users = (
     await clerkClient.users.getUserList({
-      userId: posts.map((post) => post.authorId),
+      // userId: posts.map((post) => post.authorId),
       limit: 100,
     })
   ).map(filterUserForClient);
-
+console.log(users)
   return posts.map((post) => {
     const author = users.find((user) => user.id === post.authorId);
 

@@ -10,7 +10,7 @@ export const profileRouter = createTRPCRouter({
     .input(z.object({ username: z.string() }))
     .query(async ({ input }) => {
       const [user] = await clerkClient.users.getUserList({
-        username: [input.username],
+         query: input.username,
       });
 
       if (!user) {
